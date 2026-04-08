@@ -1,66 +1,106 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>Tính Lượng Đùn</title>
-<style>
-body { font-family: Arial; padding: 20px; }
-input, select, button {
-  width: 100%;
-  padding: 10px;
-  margin: 5px 0;
-  font-size: 16px;
-}
-.result {
-  margin-top: 20px;
-  font-weight: bold;
-  font-size: 18px;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shot Size Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 15px;
+    }
+    .card {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    h2 {
+      margin-top: 0;
+    }
+    .result {
+      font-size: 16px;
+      margin: 6px 0;
+    }
+    .highlight {
+      background: #111;
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+    }
+  </style>
 </head>
-
 <body>
 
-<h2>Tính Lượng Đùn (Shot Size)</h2>
+<div class="card">
+  <h2>Shot Size Calculator</h2>
 
-<label>Khối lượng sản phẩm (g)</label>
-<input type="number" id="weight">
+  <label>Thể tích (cm³)</label>
+  <input id="volume" value="2.5">
 
-<label>Đường kính trục vít (mm)</label>
-<input type="number" id="diameter">
+  <label>Runner (%)</label>
+  <input id="runner" value="20">
 
-<label>Chọn vật liệu</label>
-<select id="material">
-  <option value="1.41">POM</option>
-  <option value="1.31">PBT</option>
-  <option value="0.95">PE</option>
-  <option value="1.35">PPS</option>
-  <option value="1.20">PC</option>
-</select>
+  <label>Trục vít (mm)</label>
+  <input id="diameter" value="28">
 
-<button onclick="calculate()">Tính</button>
+  <label>Vật liệu</label>
+  <select id="material">
+    <option value="1.42">POM</option>
+    <option value="1.55">PPS</option>
+    <option value="1.31">PBT</option>
+    <option value="1.2">PC</option>
+    <option value="0.94">PE</option>
+    <option value="1.04">ABS</option>
+    <option value="1.14">PA</option>
+  </select>
+</div>
 
-<div class="result" id="result"></div>
+<div class="card">
+  <div id="output"></div>
+</div>
 
 <script>
-function calculate() {
-  let W = parseFloat(document.getElementById("weight").value);
-  let D = parseFloat(document.getElementById("diameter").value) / 10; // mm -> cm
-  let rho = parseFloat(document.getElementById("material").value);
+function calc() {
+  const V = parseFloat(document.getElementById('volume').value) || 0;
+  const runner = parseFloat(document.getElementById('runner').value) || 0;
+  const D = parseFloat(document.getElementById('diameter').value) || 0;
+  const rho = parseFloat(document.getElementById('material').value) || 0;
 
-  if (!W || !D) {
-    document.getElementById("result").innerHTML = "Nhập đầy đủ dữ liệu!";
-    return;
-  }
+  if (V <= 0 || D <= 0) return;
 
-  let V = W / rho;
-  let A = Math.PI * D * D / 4;
-  let L = V / A;
+  const Vtotal = V * (1 + runner / 100);
+  const weight = Vtotal * rho;
+  const area = Math.PI * D * D / 4;
+  const ccPerMm = area / 1000;
+  const stroke = Vtotal / ccPerMm;
 
-  document.getElementById("result").innerHTML =
-    "Thể tích: " + V.toFixed(2) + " cm³<br>" +
-    "Hành trình đùn: " + (L * 10).toFixed(2) + " mm";
+  document.getElementById('output').innerHTML = `
+    <div class="highlight">
+      Lượng đùn: ${Vtotal.toFixed(2)} cm³<br>
+      Khối lượng: ${weight.toFixed(2)} g
+    </div>
+    <div class="result">cm³/mm: ${ccPerMm.toFixed(3)}</div>
+    <div class="result">Hành trình vít: ${stroke.toFixed(2)} mm</div>
+  `;
 }
+
+document.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('input', calc);
+});
+
+calc();
 </script>
 
 </body>
